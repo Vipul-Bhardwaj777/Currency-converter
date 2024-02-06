@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#616161',
   },
   topContainer: {
-    flex: 1,
+    flex: 2,
     alignItems: 'center',
     justifyContent: 'space-evenly',
   },
