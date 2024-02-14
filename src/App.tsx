@@ -5,16 +5,64 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
-import React, {PropsWithChildren, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import CurrcyBtn from './Components/CurrcyBtn';
 import {currencyByRupee} from './constants';
 import Snackbar from 'react-native-snackbar';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 const App = () => {
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+        '115124193463-7hg7c2jtqteb1tt0q0vgiidvnf12sfcl.apps.googleusercontent.com',
+    });
+  }, []);
+
   const [inputValue, setInputValue] = useState('');
   const [resultValue, setResultValue] = useState('');
   const [targetValue, setTargetValue] = useState('');
+
+  const GoogleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      Alert.alert('SignIN Success');
+      console.log('User Info', userInfo);
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log(error);
+        // user cancelled the login flow
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (e.g. sign in) is in progress already
+        console.log(error);
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+        console.log(error);
+      } else {
+        // some other error happened
+        console.log(error);
+      }
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await GoogleSignin.signOut();
+      // Remember to remove the user from your app's state as well
+      Alert.alert('Logout Success');
+
+      console.log('Signed out successfully');
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const btnPress = (item: Currency) => {
     if (!inputValue) {
@@ -40,15 +88,28 @@ const App = () => {
     }
   };
 
-  const reset = () => {
-    console.log('Resetting...');
-    setInputValue('');
-    setResultValue('');
-    console.log('Reset complete.');
-  };
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
+        <GoogleSigninButton
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={GoogleLogin}
+        />
+        <TouchableOpacity
+          onPress={signOut}
+          style={{
+            backgroundColor: '#FFF',
+            width: '30%',
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 20,
+          }}>
+          <Text style={{color: '#000000', fontWeight: '700', fontSize: 20}}>
+            Sign Out
+          </Text>
+        </TouchableOpacity>
         <View style={styles.rupeesContainer}>
           <Text style={styles.rupee}>₹</Text>
           <TextInput
